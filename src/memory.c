@@ -346,8 +346,9 @@ emu_recorder_set(gif_recorder_command_t command)
 // 9: read: cpu clock bits 8-15
 // 10: write: output debug byte 2
 // 10: read: cpu clock bits 16-23
-// 11: write: write character to STDOUT of console
+// 11: write: write iso 8859-15 character to STDOUT of console
 // 11: read: cpu clock MSB bits 24-31
+// 12: write: write byte to STDOUT of console
 // POKE $9FB3,1:PRINT"ECHO MODE IS ON":POKE $9FB3,0
 void
 emu_write(uint8_t reg, uint8_t value)
@@ -367,7 +368,7 @@ emu_write(uint8_t reg, uint8_t value)
 		case 10: printf("User debug 2: $%02x\n", value); fflush(stdout); break;
 		case 11: {
 			if (value == 0x09 || value == 0x0a || value == 0x0d || (value >= 0x20 && value < 0x7f)) {
-				printf("%c", value);
+				putchar(value);
 			} else if (value >= 0xa1) {
 				print_iso8859_15_char((char) value);
 			} else {
@@ -376,6 +377,7 @@ emu_write(uint8_t reg, uint8_t value)
 			fflush(stdout);
 			break;
 		}
+		case 12: putchar(value); fflush(stdout); break;
 		default: printf("WARN: Invalid register %x\n", DEVICE_EMULATOR + reg);
 	}
 }
